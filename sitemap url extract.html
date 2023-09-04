@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap URL Extractor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sitemap URL Extractor</h1>
+    <p>Paste the URL of your sitemap or sitemap index:</p>
+    <input type="text" id="sitemapUrl" placeholder="Enter sitemap URL">
+    <button onclick="extractUrls()">Extract URLs</button>
+    <h2>Extracted URLs:</h2>
+    <ul id="urlList"></ul>
+    <script>
+        function extractUrls() {
+            const sitemapUrl = document.getElementById("sitemapUrl").value;
+            const urlList = document.getElementById("urlList");
+
+            // Clear previous results
+            urlList.innerHTML = "";
+
+            // Fetch the sitemap or sitemap index XML content from the provided URL
+            fetch(sitemapUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, "text/xml");
+                    const sitemapIndexElements = xmlDoc.getElementsByTagName("sitemapindex");
+                    const urlElements = xmlDoc.getElementsByTagName("url");
+
+                    if (sitemapIndexElements.length > 0) {
+                        // It's a sitemap index
+                        for (let i = 0; i < urlElements.length; i++) {
+                            const url = urlElements[i].getElementsByTagName("loc")[0].textContent;
+                            const listItem = document.createElement("li");
+                            listItem.textContent = url;
+                            urlList.appendChild(listItem);
+                        }
+                    } else {
+                        // It's a regular sitemap
+                        for (let i = 0; i < urlElements.length; i++) {
+                            const url = urlElements[i].getElementsByTagName("loc")[0].textContent;
+                            const listItem = document.createElement("li");
+                            listItem.textContent = url;
+                            urlList.appendChild(listItem);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching sitemap:", error);
+                    const errorMessage = document.createElement("li");
+                    errorMessage.textContent = "Error fetching sitemap. Please check the URL and try again.";
+                    urlList.appendChild(errorMessage);
+                });
+        }
+    </script>
+</body>
+</html>
